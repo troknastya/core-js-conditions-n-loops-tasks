@@ -336,10 +336,54 @@ function getBalanceIndex(/* arr */) {
  *          [10, 9,  8,  7]
  *        ]
  */
-function getSpiralMatrix(/* size */) {
-  throw new Error('Not implemented');
-}
 
+function getSpiralMatrix(size) {
+  const matrix = [];
+  for (let i = 0; i < size; i += 1) {
+    matrix[i] = [];
+    for (let j = 0; j < size; j += 1) {
+      matrix[i][j] = 0;
+    }
+  }
+
+  let currentNumber = 1;
+  let top = 0;
+  let bottom = size - 1;
+  let left = 0;
+  let right = size - 1;
+
+  while (top <= bottom && left <= right) {
+    for (let col = left; col <= right; col += 1) {
+      matrix[top][col] = currentNumber;
+      currentNumber += 1;
+    }
+    top += 1;
+
+    for (let row = top; row <= bottom; row += 1) {
+      matrix[row][right] = currentNumber;
+      currentNumber += 1;
+    }
+    right -= 1;
+
+    if (top <= bottom) {
+      for (let col = right; col >= left; col -= 1) {
+        matrix[bottom][col] = currentNumber;
+        currentNumber += 1;
+      }
+      bottom -= 1;
+    }
+
+    if (left <= right) {
+      for (let row = bottom; row >= top; row -= 1) {
+        matrix[row][left] = currentNumber;
+        currentNumber += 1;
+      }
+      left += 1;
+    }
+  }
+
+  return matrix;
+}
 /**
  * Rotates a matrix by 90 degrees clockwise in place.
  * Take into account that the matrix size can be very large. Consider how you can optimize your solution.
@@ -355,8 +399,33 @@ function getSpiralMatrix(/* size */) {
  *    [7, 8, 9]         [9, 6, 3]
  *  ]                 ]
  */
-function rotateMatrix(/* matrix */) {
-  throw new Error('Not implemented');
+function rotateMatrix(inputMatrix) {
+  const n = inputMatrix.length;
+  const matrix = [];
+
+  for (let i = 0; i < n; i += 1) {
+    matrix[i] = [];
+    for (let j = 0; j < n; j += 1) {
+      matrix[i][j] = inputMatrix[i][j];
+    }
+  }
+
+  for (let layer = 0; layer < Math.floor(n / 2); layer += 1) {
+    const first = layer;
+    const last = n - 1 - layer;
+
+    for (let i = first; i < last; i += 1) {
+      const offset = i - first;
+      const top = matrix[first][i];
+
+      matrix[first][i] = matrix[last - offset][first];
+      matrix[last - offset][first] = matrix[last][last - offset];
+      matrix[last][last - offset] = matrix[i][last];
+      matrix[i][last] = top;
+    }
+  }
+
+  return matrix;
 }
 
 /**
@@ -394,8 +463,46 @@ function sortByAsc(/* arr */) {
  *  '012345', 3 => '024135' => '043215' => '031425'
  *  'qwerty', 3 => 'qetwry' => 'qtrewy' => 'qrwtey'
  */
-function shuffleChar(/* str, iterations */) {
-  throw new Error('Not implemented');
+function shuffleChar(str, iterations) {
+  if (str.length === 0 || iterations === 0) {
+    return str;
+  }
+
+  let result = str;
+  const results = [str];
+  let currentIteration = 0;
+  let cycleFound = false;
+
+  for (let i = 0; i < iterations; i += 1) {
+    let evenChars = '';
+    let oddChars = '';
+
+    for (let j = 0; j < result.length; j += 1) {
+      if (j % 2 === 0) {
+        evenChars += result[j];
+      } else {
+        oddChars += result[j];
+      }
+    }
+
+    result = evenChars + oddChars;
+    currentIteration += 1;
+
+    if (result === str) {
+      cycleFound = true;
+      break;
+    }
+
+    results[currentIteration] = result;
+  }
+
+  if (cycleFound) {
+    const cycleLength = currentIteration;
+    const effectiveIterations = iterations % cycleLength;
+    return results[effectiveIterations];
+  }
+
+  return result;
 }
 
 /**
@@ -416,8 +523,59 @@ function shuffleChar(/* str, iterations */) {
  * 321321   => 322113
  *
  */
-function getNearestBigger(/* number */) {
-  throw new Error('Not implemented');
+function getNearestBigger(number) {
+  if (number < 10) return number;
+
+  const digits = [];
+  let num = number;
+  let digitCount = 0;
+
+  while (num > 0) {
+    digits[digitCount] = num % 10;
+    num = Math.floor(num / 10);
+    digitCount += 1;
+  }
+
+  digits.reverse();
+
+  let pivotIndex = -1;
+  for (let i = digitCount - 2; i >= 0; i -= 1) {
+    if (digits[i] < digits[i + 1]) {
+      pivotIndex = i;
+      break;
+    }
+  }
+
+  if (pivotIndex === -1) return number;
+
+  let swapIndex = -1;
+  for (let i = digitCount - 1; i > pivotIndex; i -= 1) {
+    if (digits[i] > digits[pivotIndex]) {
+      swapIndex = i;
+      break;
+    }
+  }
+
+  const tempValue = digits[pivotIndex];
+  digits[pivotIndex] = digits[swapIndex];
+  digits[swapIndex] = tempValue;
+
+  for (let i = pivotIndex + 1; i < digitCount - 1; i += 1) {
+    for (let j = i + 1; j < digitCount; j += 1) {
+      if (digits[i] > digits[j]) {
+        const swapTemp = digits[i];
+        digits[i] = digits[j];
+        digits[j] = swapTemp;
+      }
+    }
+  }
+
+  let result = 0;
+  for (let i = 0; i < digitCount; i += 1) {
+    result = result * 10 + digits[i];
+  }
+
+  return result;
 }
 
 module.exports = {
